@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¡Activa la Mente de Mateo!</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+<style>
+:root{color-scheme:dark;--ink:#0b0b2a;--vio:#7c5cff;--ora:#ff7a1a;--yel:#ffd60a;--pan:rgba(12,10,40,.9);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;font-weight:600;color:#fff;background:#14113a;transition:background .6s}
+h1,h2,.ttl{font-family:'Bangers','Impact',system-ui,sans-serif;letter-spacing:.04em;font-weight:400}
+.frame{border:4px solid var(--ink);border-radius:18px;box-shadow:0 0 0 3px var(--vio),0 8px 24px rgba(0,0,0,.5);overflow:hidden;background:#fff}
+.dlg{background:var(--pan);border:3px solid var(--vio);border-radius:18px;box-shadow:0 0 22px rgba(124,92,255,.65)}
+.panel{background:var(--pan);border:3px solid var(--vio);border-radius:16px}
+.op{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;font-size:1.05rem;color:#fff;background:#241f66;border:3px solid #8f7bff;border-radius:14px;padding:12px 14px;cursor:pointer;transition:transform .15s,border-color .15s}
+.op:hover:not(:disabled){transform:translateY(-2px);border-color:var(--ora)}
+.op:focus-visible,.btn:focus-visible{outline:4px solid var(--yel);outline-offset:3px}
+.op b{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--ora);color:var(--ink);font-family:'Bangers',system-ui;font-size:1.2rem}
+.op.ok{background:#0f6b3a;border-color:#4cff9a;box-shadow:0 0 18px #4cff9a}
+.op.ok b{background:#4cff9a}
+.op.no{background:#5a1020;border-color:#ff4d6d;animation:shake .45s}
+.op.dim{opacity:.45}
+.btn{font-family:'Bangers',system-ui;font-size:1.6rem;letter-spacing:.05em;color:var(--ink);background:linear-gradient(180deg,var(--yel),var(--ora));border:4px solid var(--ink);border-radius:14px;padding:8px 26px;cursor:pointer;box-shadow:0 5px 0 var(--ink),0 0 18px rgba(255,122,26,.6);transition:transform .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.flash{position:fixed;inset:0;pointer-events:none;border:10px solid transparent;opacity:0;z-index:40}
+.flash.r{border-color:#ff2d55;animation:fl .6s}.flash.g{border-color:#2dff8a;animation:fl .7s}
+.float{position:fixed;left:50%;top:32%;transform:translateX(-50%);font-family:'Bangers',system-ui;font-size:3rem;color:var(--yel);text-shadow:3px 3px 0 var(--ink),0 0 20px var(--ora);pointer-events:none;z-index:45;animation:rise 1.4s forwards}
+.pip{width:14px;height:14px;border-radius:50%;border:3px solid var(--yel);background:transparent}.pip.on{background:var(--yel)}
+.fb{border-left:8px solid var(--yel);background:rgba(255,214,10,.12);border-radius:12px;padding:10px 14px}
+.fb.g{border-color:#4cff9a;background:rgba(76,255,154,.12)}.fb.r{border-color:#ff4d6d;background:rgba(255,77,109,.14)}
+.in{animation:in .5s both}
+@keyframes shake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+@keyframes fl{0%{opacity:1}100%{opacity:0}}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,20px) scale(.6)}25%{opacity:1;transform:translate(-50%,0) scale(1.1)}100%{opacity:0;transform:translate(-50%,-60px)}}
+@keyframes in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.bob{animation:bob 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.op.no,.bob,.in{animation:none}.float{animation-duration:.01s}}
+</style>
+</head>
+<body>
+<div class="flash" id="fl"></div>
+<main id="g" class="max-w-3xl mx-auto px-3 py-3 min-h-screen flex flex-col gap-3"></main>
+<script>
+const $=s=>document.querySelector(s),G=$('#g');
+let AC,muted=false,tm=null,cur=0;
+
+/* ---------- Sonido ---------- */
+function snd(t){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const ok=t==='ok',seq=ok?[[523,0],[659,.1],[784,.2],[1047,.3]]:[[220,0],[150,.12]];
+seq.forEach(([f,d])=>{const o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+d;o.type=ok?'triangle':'sawtooth';o.frequency.value=f;g.gain.setValueAtTime(.0001,s);g.gain.exponentialRampToValueAtTime(ok?.2:.08,s+.02);g.gain.exponentialRampToValueAtTime(.0001,s+.2);o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+.22)})}catch(e){}}
+function flash(c){const f=$('#fl');f.className='flash';void f.offsetWidth;f.className='flash '+c}
+function say(t){const e=document.createElement('div');e.className='float';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1500)}
+
+/* ---------- Personajes (SVG humanos, proporciones naturales) ---------- */
+const P=(x,y,k=1,o={})=>{const{skin='#F2C29B',hair='#241a3a',top='#fff',vest='',bot='#1c2252',long=0,mouth='M-6 -3q6 5 12 0'}=o;
+return `<g transform="translate(${x} ${y}) scale(${k})" stroke="#0b0b2a" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><rect x="-13" y="36" width="10" height="38" rx="4" fill="${bot}"/><rect x="3" y="36" width="10" height="38" rx="4" fill="${bot}"/><rect x="-20" y="8" width="40" height="36" rx="10" fill="${top}"/>${vest?`<rect x="-20" y="24" width="40" height="20" rx="6" fill="${vest}"/>`:''}<rect x="-28" y="12" width="8" height="26" rx="4" fill="${top}"/><rect x="20" y="12" width="8" height="26" rx="4" fill="${top}"/>${long?`<rect x="-22" y="-30" width="44" height="48" rx="16" fill="${hair}"/>`:''}<circle cy="-12" r="20" fill="${skin}"/><path d="M-21 -14Q-19 -36 0 -35Q19 -36 21 -14Q10 -25 0 -21Q-10 -25 -21 -14Z" fill="${hair}"/><circle cx="-7" cy="-11" r="2.6" fill="#0b0b2a" stroke="none"/><circle cx="7" cy="-11" r="2.6" fill="#0b0b2a" stroke="none"/><path d="${mouth}" transform="translate(0 4)" fill="none"/></g>`};
+const SAD='M-6 2q6 -5 12 0',MATEO={vest:'#3B2FD1'};
+const avatar=(o=MATEO)=>`<svg viewBox="-27 -42 54 58" class="w-16 h-16 flex-none rounded-xl" style="background:#cdd6ff;border:3px solid #0b0b2a" aria-hidden="true">${P(0,0,1,o)}</svg>`;
+const bub=(x,y,t,w=70)=>`<g stroke="#0b0b2a" stroke-width="2.5"><rect x="${x}" y="${y}" width="${w}" height="26" rx="13" fill="#fff"/><text x="${x+w/2}" y="${y+18}" text-anchor="middle" font-size="13" font-weight="800" fill="#0b0b2a" stroke="none">${t}</text></g>`;
+const svg=b=>`<svg viewBox="0 0 400 230" class="w-full block" role="img" aria-label="Ilustración de la escena">${b}</svg>`;
+
+/* ---------- Escenas ---------- */
+const SC=[
+{t:'Clase de Historia',bg:'linear-gradient(160deg,#2b2d8f,#14113a)',
+ art:()=>svg(`<rect width="400" height="230" fill="#dfe6ff"/><rect y="175" width="400" height="55" fill="#c9a574"/><rect x="20" y="20" width="110" height="90" rx="6" fill="#9fd3ff" stroke="#0b0b2a" stroke-width="4"/><circle cx="95" cy="48" r="16" fill="#ffd60a"/><path d="M75 110V20M20 65H130" stroke="#0b0b2a" stroke-width="3"/><text x="160" y="40" font-size="20" font-weight="800" fill="#ff4d6d">♪ ¡BIIIP! ♪</text><ellipse cx="320" cy="48" rx="60" ry="30" fill="#fff" stroke="#0b0b2a" stroke-width="3"/><text x="320" y="55" text-anchor="middle" font-size="22">⚽🏃‍♂️</text><circle cx="262" cy="86" r="6" fill="#fff" stroke="#0b0b2a" stroke-width="2"/><circle cx="248" cy="100" r="4" fill="#fff" stroke="#0b0b2a" stroke-width="2"/>${P(205,92,1.15,{...MATEO,mouth:'M-5 0h10'})}<rect x="120" y="150" width="170" height="16" rx="4" fill="#8b5a2b" stroke="#0b0b2a" stroke-width="3"/><path d="M165 148l40-10 40 10v-6l-40-10-40 10z" fill="#fff" stroke="#0b0b2a" stroke-width="3"/><rect x="130" y="166" width="8" height="40" fill="#5a3a1b"/><rect x="272" y="166" width="8" height="40" fill="#5a3a1b"/>`),
+ txt:`Mateo lee sobre los antiguos egipcios, pero afuera suena una bocina y su mente se escapa al recreo. ¡Su linterna atencional apunta a otro lado! ¿Qué puede hacer para volver a la lectura?`,
+ ops:[
+ {t:`Respirar hondo, decirse “Leo un párrafo a la vez” y seguir la línea con el dedo.`,ok:1,fb:`Una orden corta y un plan pequeño le dicen a tu linterna adónde apuntar. Respirar calma el cuerpo y el dedo te ayuda a no perderte. ¡Así se enfoca la mente!`},
+ {t:`Dejar el libro y seguir pensando en el recreo.`,fb:`Mientras piensa en el recreo, la linterna sigue apuntando lejos y el libro se queda esperando. Mateo necesita traerla de vuelta.`},
+ {t:`Taparse los oídos y cerrar los ojos un rato largo.`,fb:`Con los ojos cerrados no puede leer. Ignorar el ruido está bien, pero la linterna debe quedar sobre la lectura.`}]},
+{t:'Clase de Matemáticas',bg:'linear-gradient(160deg,#0f6b5a,#14113a)',
+ art:()=>svg(`<rect width="400" height="230" fill="#e9f7ee"/><rect y="180" width="400" height="50" fill="#c9a574"/><rect x="15" y="15" width="210" height="115" rx="6" fill="#1f5c4a" stroke="#8b5a2b" stroke-width="6"/><circle cx="60" cy="60" r="16" fill="none" stroke="#fff" stroke-width="3"/><path d="M100 80l22-40 22 40zM165 50h40M165 70h40M165 90h25" fill="none" stroke="#fff" stroke-width="3"/><rect x="300" y="20" width="85" height="85" rx="6" fill="#9fd3ff" stroke="#0b0b2a" stroke-width="4"/><text x="335" y="70" font-size="30">🐦</text><text x="345" y="40" font-size="16" fill="#0b0b2a">♪</text>${P(262,90,1.1,{long:1,hair:'#6b3a1e',top:'#d94f8b',bot:'#3a3a5a'})}${P(60,128,.8,{hair:'#6b3a1e',top:'#8fd3ff'})}${P(150,128,.8,{long:1,hair:'#111',top:'#ffb86b'})}${P(105,130,.85,{...MATEO,mouth:'M-5 0h10'})}<rect x="20" y="170" width="190" height="14" rx="4" fill="#8b5a2b" stroke="#0b0b2a" stroke-width="3"/>${bub(40,100,'bla bla',60)}${bub(120,96,'¡jaja!',56)}`),
+ txt:`La profesora explica en el tablero. Pero hay un pajarito cantando en la ventana y unos compañeros conversan bajito. Mateo mira para todos lados. ¿Cómo puede guiar su linterna de vuelta al tablero?`,
+ ops:[
+ {t:`Mirar al pajarito un ratito más, solo hasta que se vaya.`,fb:`El pajarito puede tardar mucho en irse, y mientras tanto Mateo se pierde la explicación. Un “ratito más” casi siempre se alarga.`},
+ {t:`Darse vuelta a conversar con los compañeros.`,fb:`Conversar mete más ruido en su cabeza y se pierde lo que dice la profe. Eso hace que la linterna se mueva aún más.`},
+ {t:`Notar el ruido, decirse “Eso no es para ahora, ahora miro el tablero”, y volver los ojos a la profe. Si se distrae otra vez, vuelve otra vez.`,ok:1,fb:`¡Notar la distracción no es malo! Lo importante es dejarla pasar y regresar la linterna al tablero. Mantener el foco a veces significa volver varias veces, y cada vez se hace más fácil.`}]},
+{t:'Partido de Fútbol',bg:'linear-gradient(160deg,#1f7a3a,#14113a)',
+ art:()=>svg(`<rect width="400" height="230" fill="#8fd3ff"/><rect y="105" width="400" height="125" fill="#3aa655"/><path d="M0 150h400M0 195h400" stroke="#2e8f47" stroke-width="22" opacity=".6"/><rect x="10" y="60" width="60" height="70" fill="none" stroke="#fff" stroke-width="4"/><path d="M10 80h60M10 100h60M30 60v70M50 60v70" stroke="#fff" stroke-width="1.5" opacity=".7"/>${P(205,92,1.1,{top:'#ff7a1a',bot:'#1c2252',mouth:SAD,vest:''})}<circle cx="150" cy="200" r="14" fill="#fff" stroke="#0b0b2a" stroke-width="3"/><path d="M143 196l7-4 7 4-2 8h-10z" fill="#0b0b2a"/>${P(335,88,1.2,{top:'#3B2FD1',hair:'#111',bot:'#222'})}${bub(268,36,'¡¡Atención!!',92)}<text x="195" y="42" font-size="22" fill="#14113a" font-weight="800">…</text>`),
+ txt:`Mateo se equivocó en una jugada y el entrenador lo regañó. Ahora Mateo siente un nudo en la barriga y la cabeza llena de pensamientos feos. El partido sigue y no logra concentrarse. ¿Qué puede hacer?`,
+ ops:[
+ {t:`Pensar “Soy malo, nunca lo haré bien” y quedarse quieto en la cancha.`,fb:`Ese pensamiento lo hace sentir peor y la linterna se queda atrapada en el regaño, no en el partido.`},
+ {t:`Patear la pelota enojado, lo más fuerte posible.`,fb:`Con el enojo manda, Mateo actúa sin pensar y puede lastimar a alguien o perder la pelota. Primero hay que calmar el cuerpo.`},
+ {t:`Respirar lento tres veces y decirse “Me equivoqué, puedo seguir. Ahora miro la pelota”.`,ok:1,fb:`Respirar despacio calma el cuerpo y hablarte con cariño cambia el pensamiento feo por uno que ayuda. Así la linterna vuelve a la pelota.`}]},
+{t:'Instrucciones en casa',bg:'linear-gradient(160deg,#a8561a,#14113a)',
+ art:()=>svg(`<rect width="400" height="230" fill="#ffe2b8"/><rect y="175" width="400" height="55" fill="#b07a4a"/><rect x="20" y="30" width="120" height="8" fill="#8b5a2b" stroke="#0b0b2a" stroke-width="2"/><rect x="30" y="12" width="14" height="18" fill="#ff4d6d"/><rect x="50" y="8" width="14" height="22" fill="#4fc3f7"/><rect x="40" y="170" width="60" height="45" rx="10" fill="#d94f4f" stroke="#0b0b2a" stroke-width="3"/><rect x="200" y="196" width="40" height="22" rx="3" fill="#4fc3f7" stroke="#0b0b2a" stroke-width="2"/><rect x="250" y="200" width="36" height="18" rx="3" fill="#ffd60a" stroke="#0b0b2a" stroke-width="2"/><path d="M120 205l40-4" stroke="#0b0b2a" stroke-width="5"/>${P(160,100,1,{top:'#4fc3f7',bot:'#3a3a8a'})}<g stroke="#0b0b2a" stroke-width="2.5"><rect x="190" y="108" width="34" height="16" rx="6" fill="#ff4d6d"/><circle cx="198" cy="126" r="5" fill="#333"/><circle cx="216" cy="126" r="5" fill="#333"/></g>${P(320,85,1.25,{long:1,hair:'#4a2a1a',top:'#ff7a1a',bot:'#2b2d8f'})}${bub(230,22,'¡Mateo, escucha!',120)}`),
+ txt:`Mateo está jugando con su carrito favorito. Su mamá le dice: “Guarda los cuadernos en la mochila, los lápices en el estuche y lleva la mochila a la puerta”. ¡Pero el carrito está en la mejor parte! ¿Qué hace Mateo?`,
+ ops:[
+ {t:`Seguir jugando y escuchar a medias.`,fb:`Si solo oye a medias, se le olvidan partes y mamá tendrá que repetir. La linterna no puede estar en dos lugares a la vez.`},
+ {t:`Salir corriendo a guardar lo primero que oyó.`,fb:`Si actúa muy rápido, se pierde el resto de la instrucción y se olvida de los lápices y de la puerta. Frenar a tiempo es parte de la solución.`},
+ {t:`Hacer pausa con el carrito, mirar a mamá, escuchar todo, repetirlo en su mente (“cuadernos, lápices, mochila”) y empezar.`,ok:1,fb:`¡Pausar el juego, mirar y escuchar completo permite entender qué hay que hacer! Repetirlo en la mente lo guarda, y así Mateo actúa sin olvidar nada.`}]}];
+
+/* ---------- Pantallas ---------- */
+const shuf=a=>[...a].sort(()=>Math.random()-.5);
+const pips=n=>`<div class="flex gap-2 justify-center" aria-label="Escena ${n+1} de ${SC.length}">${SC.map((_,i)=>`<span class="pip ${i<=n?'on':''}"></span>`).join('')}</div>`;
+const tools=`<button class="absolute top-2 right-2 text-xl p-2" id="mu" aria-label="Sonido"><i class="fa-solid fa-volume-high"></i></button>`;
+function view(h,bg){clearTimeout(tm);G.innerHTML=`<div class="in relative flex flex-col gap-3 flex-1">${tools}${h}</div>`;if(bg)document.body.style.background=bg;window.scrollTo(0,0);
+ $('#mu').onclick=()=>{muted=!muted;$('#mu').innerHTML=`<i class="fa-solid fa-volume-${muted?'xmark':'high'}"></i>`}}
+
+const REFS=[
+`Rossignoli-Palomeque, Quirós-Godoy, Pérez-Hernández y González-Marqués (2019). Schoolchildren’s compensatory strategies and skills in relation to attention and executive function app training. <i>Frontiers in Psychology, 10</i>, 2332.`,
+`Tamm y Nakonezny (2015). Metacognitive executive function training for young children with ADHD. <i>ADHD Attention Deficit and Hyperactivity Disorders, 7</i>(3), 183–190.`,
+`Friedling y O’Leary (1979). Effects of self-instructional training on second- and third-grade hyperactive children. <i>J. Applied Behavior Analysis, 12</i>(2), 211–219.`,
+`Rueda, Posner y Rothbart (2005). The development of executive attention: contributions to the emergence of self-regulation. <i>Developmental Neuropsychology, 28</i>(2).`,
+`Loher y Roebers (2013). Executive functions and their differential contribution to sustained attention in 5- to 8-year-old children. <i>J. Educational and Developmental Psychology, 3</i>(1).`,
+`Rincón-Pérez et al. (2021). Selective inhibitory control in middle childhood. <i>Int. J. Environmental Research and Public Health, 18</i>(12), 6300.`,
+`Poutanen et al. (2016). Development of attention and executive functions from 6 to 8 years in Finnish children. <i>Scandinavian J. of Psychology, 57</i>(1).`,
+`Hanania y Smith (2009). Selective attention and attention switching: towards a unified developmental approach. <i>Developmental Science, 13</i>(4).`,
+`Lewis, Reeve, Kelly y Johnson (2017). Sustained attention to a predictable, unengaging Go/No-Go task. <i>Attention, Perception &amp; Psychophysics, 79</i>(6).`,
+`How Relaxing Develops and Affects Well-being Throughout Childhood (2022). <i>Innocenti Working Papers</i>.`,
+`Mohammadzadeghan y Farid. Programa de aprendizaje socioemocional basado en mindfulness y atención sostenida. jcp.khu.ac.ir/article_4910_en.html`,
+`Tommasi et al. (2026). Effectiveness of serious games for training of attention and executive functions: a systematic review. <i>Frontiers in Child and Adolescent Psychiatry, 5</i>.`];
+
+function cover(){
+ view(`<div class="text-center pt-6"><h1 class="text-5xl sm:text-6xl" style="color:var(--yel);text-shadow:4px 4px 0 var(--ink),0 0 24px var(--ora)">¡Activa la Mente de Mateo!</h1>
+ <p class="mt-1 text-lg">Novela visual para niñas y niños de 7 a 8 años</p></div>
+ <div class="frame mx-auto w-full max-w-md bob">${svg(`<rect width="400" height="230" fill="#cdd6ff"/><circle cx="330" cy="50" r="24" fill="#ffd60a"/><path d="M200 120L320 60 380 230H200Z" fill="#ffd60a" opacity=".35"/>${P(200,100,1.4,MATEO)}<text x="300" y="110" font-size="42">🔦</text>`)}</div>
+ <div class="panel p-4 grid gap-3 text-base">
+ <p><i class="fa-solid fa-bullseye" style="color:var(--yel)"></i> <b>Objetivo de aprendizaje:</b> descubrir que la atención es como una linterna que podemos dirigir, y conocer estrategias para enfocarla: hacer una pausa, hablarnos con calma, ignorar distractores y escuchar con calma antes de actuar.</p>
+ <p><i class="fa-solid fa-hand-pointer" style="color:var(--yel)"></i> <b>Cómo se juega:</b> eres el Guía Atencional de Mateo. En cada escena lee la historia y toca la mejor opción. Puedes intentar las veces que quieras; avanzas al acertar. Después lee por qué funcionó.</p>
+ <p><i class="fa-solid fa-user-pen" style="color:var(--yel)"></i> <b>Autoría:</b> Juliana Téllez, Nicolás Ruiz y Patricio Cortés</p>
+ <details><summary class="cursor-pointer font-extrabold"><i class="fa-solid fa-book" style="color:var(--yel)"></i> Referencias teóricas principales</summary>
+ <p class="text-sm mt-2">Marco: funciones ejecutivas (control inhibitorio, vigilancia y atención sostenida, flexibilidad atencional) y estrategias metacognitivas (autoinstrucciones, relajación, planificación).</p>
+ <ul class="text-sm list-disc pl-5 mt-2 grid gap-1 max-h-56 overflow-y-auto">${REFS.map(r=>`<li>${r}</li>`).join('')}</ul></details></div>
+ <div class="text-center pb-4"><button class="btn" id="go">Comenzar Aventura</button></div>`,'linear-gradient(160deg,#3B2FD1,#14113a)');
+ $('#go').onclick=()=>{snd('ok');intro()}}
+
+function intro(){
+ view(`<div class="frame">${SC[0].art().replace(/<svg/,'<svg').replace('</svg>','</svg>')}</div>
+ <div class="dlg p-4 flex gap-3 items-start">${avatar()}<div><b class="ttl text-2xl" style="color:var(--yel)">Mateo</b>
+ <p class="text-lg leading-snug">A Mateo a veces se le dificulta prestar atención y su mente vuela como un cometa. ¡Necesita tu ayuda para tomar buenas decisiones y enfocar su mente hoy!</p></div></div>
+ <div class="text-center pb-4"><button class="btn" id="go">¡Ayudar a Mateo!</button></div>`,SC[0].bg);
+ $('#go').onclick=()=>scene(0)}
+
+function scene(n){
+ cur=n;const s=SC[n],ops=shuf(s.ops);let done=false;
+ view(`${pips(n)}<p class="ttl text-3xl text-center" style="color:var(--yel)">${s.t}</p>
+ <div class="frame">${s.art()}</div>
+ <div class="dlg p-4"><div class="flex gap-3 items-start">${avatar(n==2?{...MATEO,mouth:SAD}:MATEO)}<div><b class="ttl text-2xl" style="color:var(--yel)">Mateo</b><p class="text-lg leading-snug">${s.txt}</p></div></div>
+ <div class="grid gap-3 mt-4" role="group" aria-label="Opciones">${ops.map((o,i)=>`<button class="op" data-i="${i}"><b>${'ABC'[i]}</b><span class="flex-1">${o.t}</span><span class="mk"></span></button>`).join('')}</div>
+ <div id="fb" class="mt-3" aria-live="polite"></div></div>`,s.bg);
+ const bs=document.querySelectorAll('.op');
+ bs.forEach(b=>b.onclick=()=>{
+  if(done)return;const o=ops[+b.dataset.i];
+  if(!o.ok){b.classList.remove('no');void b.offsetWidth;b.classList.add('no');flash('r');snd('no');try{navigator.vibrate&&navigator.vibrate([100,50,100])}catch(e){}
+   $('#fb').innerHTML=`<div class="fb r"><b><i class="fa-solid fa-xmark"></i> ¡Ups! Intenta otra vez.</b><p class="mt-1">${o.fb}</p></div>`;return}
+  done=true;b.classList.add('ok');b.querySelector('.mk').innerHTML='<i class="fa-solid fa-circle-check" style="color:#4cff9a;font-size:1.6rem"></i>';
+  bs.forEach(x=>{if(x!==b){x.classList.remove('no');x.classList.add('dim')}});
+  flash('g');snd('ok');say(['¡Buen trabajo!','¡Excelente!','¡Genial!'][n%3]);
+  const last=n===SC.length-1;
+  $('#fb').innerHTML=`<div class="fb g"><b><i class="fa-solid fa-star" style="color:var(--yel)"></i> ¿Por qué funcionó?</b><p class="mt-1">${o.fb}</p></div>
+  <div class="h-2 rounded-full mt-3 overflow-hidden" style="background:rgba(255,255,255,.2)" aria-hidden="true"><div id="bar" class="h-full" style="width:100%;background:#4cff9a;transition:width 40s linear"></div></div>
+  <div class="text-center mt-3"><button class="btn" id="nx">${last?'¡Ver el podio!':'Siguiente'} <i class="fa-solid fa-forward"></i></button></div>`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{const bar=$('#bar');if(bar)bar.style.width='0%'}));
+  const go=()=>last?podium():scene(n+1);$('#nx').onclick=go;tm=setTimeout(go,40000);$('#nx').scrollIntoView({behavior:'smooth',block:'center'})})}
+
+function podium(){
+ snd('ok');flash('g');
+ view(`<div class="text-center pt-4"><h2 class="text-5xl" style="color:var(--yel);text-shadow:4px 4px 0 var(--ink),0 0 24px var(--ora)">¡Lo lograste!</h2><p class="text-xl mt-1">Ayudaste a Mateo a concentrarse.</p></div>
+ <div class="frame">${svg(`<rect width="400" height="230" fill="#2b2d8f"/><g fill="#ffd60a"><circle cx="40" cy="40" r="4"/><circle cx="120" cy="25" r="3"/><circle cx="300" cy="35" r="4"/><circle cx="370" cy="70" r="3"/><circle cx="80" cy="90" r="3"/></g><g stroke="#0b0b2a" stroke-width="4"><rect x="140" y="140" width="120" height="90" fill="#ffd60a"/><rect x="40" y="170" width="100" height="60" fill="#c0c7d6"/><rect x="260" y="185" width="100" height="45" fill="#d98a4a"/></g><text x="200" y="195" text-anchor="middle" font-size="44" font-weight="800" fill="#0b0b2a">1</text><text x="90" y="212" text-anchor="middle" font-size="30" font-weight="800" fill="#0b0b2a">2</text><text x="310" y="218" text-anchor="middle" font-size="26" font-weight="800" fill="#0b0b2a">3</text>${P(200,28,.9,{...MATEO,mouth:'M-7 -4q7 8 14 0'})}<g stroke="#0b0b2a" stroke-width="3"><path d="M164 70h24v10q0 14-12 14t-12-14z" fill="#ffd60a" transform="translate(-30 20)"/></g><text x="130" y="108" font-size="46">🏆</text><text x="228" y="108" font-size="40">⭐</text>`)}</div>
+ <div class="dlg p-4 flex gap-3 items-center">${avatar({...MATEO,mouth:'M-7 -4q7 8 14 0'})}<p class="text-lg leading-snug">¡Gracias, Guía Atencional! Aprendiste que puedes <b>pausar</b>, <b>hablarte con calma</b>, <b>volver al foco</b> cuando algo te distrae y <b>escuchar todo</b> antes de actuar.</p></div>
+ <div class="panel p-4 text-center"><p class="ttl text-2xl" style="color:var(--yel)"><i class="fa-solid fa-pen-nib"></i> Nota de autoría</p>
+ <p class="text-base mt-1">“¡Activa la Mente de Mateo!” fue creado por <b>Juliana Téllez</b>, <b>Nicolás Ruiz</b> y <b>Patricio Cortés</b>.</p>
+ <p class="text-sm mt-1" style="opacity:.8">Herramienta educativa basada en funciones ejecutivas y estrategias metacognitivas para la atención.</p></div>
+ <div class="text-center pb-4"><button class="btn" id="rs">Reiniciar Aventura</button></div>`,'linear-gradient(160deg,#3B2FD1,#14113a)');
+ $('#rs').onclick=cover}
+cover();
+</script>
+</body>
+</html>
